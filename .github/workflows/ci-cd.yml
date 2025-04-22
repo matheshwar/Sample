@@ -80,6 +80,9 @@ jobs:
             exit 1
           fi
 
+          # Stop any processes using port 80
+          sudo fuser -k 80/tcp || true
+
           # Stop and start containers
           docker-compose down
           docker-compose up -d
@@ -89,6 +92,9 @@ jobs:
             sudo apt-get update
             sudo apt-get install -y nginx
           fi
+
+          # Stop Nginx service if running
+          sudo systemctl stop nginx || true
 
           # Ensure nginx.conf exists
           if [ ! -f /home/ubuntu/app/nginx/nginx.conf ]; then
