@@ -2,6 +2,8 @@ FROM node:16-alpine
 WORKDIR /app
 COPY package.json ./
 RUN npm install
-COPY . . # Copy all files, including public if it exists
+COPY src ./src
+COPY public ./public
+COPY .env .env # If you have an environment file
 EXPOSE 3000
 CMD ["npm", "start"]
