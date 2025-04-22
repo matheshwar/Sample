@@ -47,6 +47,22 @@ jobs:
         echo "$SSH_PRIVATE_KEY" > private_key.pem
         chmod 600 private_key.pem
         ssh -o StrictHostKeyChecking=no -i private_key.pem $EC2_USER@$EC2_HOST << 'EOF'
+          # Install Docker if not installed
+          if ! command -v docker &> /dev/null; then
+            sudo apt-get update
+            sudo apt-get install -y docker.io
+          fi
+
+          # Add user to the Docker group
+          sudo usermod -aG docker ubuntu
+          newgrp docker
+
+          # Install Docker Compose if not installed
+          if ! command -v docker-compose &> /dev/null; then
+            sudo curl -L "https://github.com/docker/compose/releases/download/1.29.2/docker-compose-$(uname -s)-$(uname -m)" -o /usr/local/bin/docker-compose
+            sudo chmod +x /usr/local/bin/docker-compose
+          fi
+
           cd /home/$EC2_USER/app
           docker-compose down
           docker-compose up -d
