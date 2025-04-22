@@ -35,6 +35,12 @@ jobs:
       run: |
         echo "$SSH_PRIVATE_KEY" > private_key.pem
         chmod 600 private_key.pem
+        ssh -o StrictHostKeyChecking=no -i private_key.pem $EC2_USER@$EC2_HOST << 'EOF'
+          # Remove the existing app folder if it exists
+          if [ -d "/home/$EC2_USER/app" ]; then
+            rm -rf /home/$EC2_USER/app
+          fi
+        EOF
         scp -o StrictHostKeyChecking=no -i private_key.pem -r ./* $EC2_USER@$EC2_HOST:/home/$EC2_USER/app
         rm private_key.pem
 
@@ -47,6 +53,9 @@ jobs:
         echo "$SSH_PRIVATE_KEY" > private_key.pem
         chmod 600 private_key.pem
         ssh -o StrictHostKeyChecking=no -i private_key.pem $EC2_USER@$EC2_HOST << 'EOF'
+          # Ensure the app directory exists
+          mkdir -p /home/$EC2_USER/app
+
           # Install Docker if not installed
           if ! command -v docker &> /dev/null; then
             sudo apt-get update
@@ -64,6 +73,13 @@ jobs:
           fi
 
           cd /home/$EC2_USER/app
+
+          # Ensure docker-compose.yml exists
+          if [ ! -f docker-compose.yml ]; then
+            echo "Error: docker-compose.yml not found in /home/$EC2_USER/app"
+            exit 1
+          fi
+
           docker-compose down
           docker-compose up -d
 
@@ -71,6 +87,12 @@ jobs:
           if ! command -v nginx &> /dev/null; then
             sudo apt-get update
             sudo apt-get install -y nginx
+          fi
+
+          # Ensure nginx.conf exists
+          if [ ! -f /home/$EC2_USER/app/nginx/nginx.conf ]; then
+            echo "Error: nginx.conf not found in /home/$EC2_USER/app/nginx"
+            exit 1
           fi
 
           # Copy Nginx configuration
