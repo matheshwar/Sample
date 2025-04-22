@@ -13,8 +13,6 @@ services:
     build: ./frontend
     ports:
       - "3000:3000"
-    environment:
-      - REACT_APP_API_URL=http://dev.domain.com/api
     networks:
       - app-network
 
