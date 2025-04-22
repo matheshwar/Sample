@@ -45,5 +45,17 @@ jobs:
           cd /home/$EC2_USER/app
           docker-compose down
           docker-compose up -d
+
+          # Install Nginx if not installed
+          if ! command -v nginx &> /dev/null; then
+            sudo apt-get update
+            sudo apt-get install -y nginx
+          fi
+
+          # Copy Nginx configuration
+          sudo cp /home/$EC2_USER/app/nginx/nginx.conf /etc/nginx/nginx.conf
+
+          # Restart Nginx
+          sudo systemctl restart nginx
         EOF
         rm private_key.pem
