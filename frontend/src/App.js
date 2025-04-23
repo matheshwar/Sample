@@ -12,7 +12,7 @@ function App() {
 
     return (
         <div>
-            <h1>Frontend</h1>
+            <h1>Frontend APP</h1>
             <p>{message}</p>
         </div>
     );
