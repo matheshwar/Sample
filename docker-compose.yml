@@ -7,14 +7,14 @@ services:
     environment:
       - NODE_ENV=production
     networks:
-      - app-network
+      - sample_app-network
 
   frontend:
     build: ./frontend
     ports:
       - "3000:3000"
     networks:
-      - app-network
+      - sample_app-network
 
   nginx:
     image: nginx:latest
@@ -24,8 +24,8 @@ services:
       - "80:80"
     restart: always
     networks:
-      - app-network
+      - sample_app-network
 
 networks:
-  app-network:
+  sample_app-network:
     driver: bridge
