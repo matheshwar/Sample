@@ -59,6 +59,8 @@ jobs:
             sudo apt-get install -y docker-compose
           fi
 
+          docker network create app-network || true
+
           # Navigate to the deployment directory
           cd /home/ubuntu
 
