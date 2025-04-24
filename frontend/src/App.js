@@ -12,7 +12,7 @@ function App() {
 
     return (
         <div>
-            <h1>Frontend APP</h1>
+            <h1>Learning Process</h1>
             <p>{message}</p>
         </div>
     );
