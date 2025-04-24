@@ -25,6 +25,12 @@ jobs:
       run: |
         docker build -t ${{ secrets.DOCKER_USERNAME }}/backend:latest ./backend
         docker push ${{ secrets.DOCKER_USERNAME }}/backend:latest
+  copy-to-ec2:
+    runs-on: ubuntu-latest
+    needs: build
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v3  
     - name: Copy files to EC2
       env:
         SSH_PRIVATE_KEY: ${{ secrets.EC2_SSH_KEY }}
@@ -43,7 +49,7 @@ jobs:
   deploy:
     name: Deploy to EC2
     runs-on: ubuntu-latest
-    needs: build
+    needs: copy-to-ec2
 
     steps:
     - name: Executing remote SSH commands on EC2
@@ -60,9 +66,6 @@ jobs:
             sudo sh get-docker.sh
           fi
 
-          # Add user to Docker group
-          sudo usermod -aG docker ubuntu
-          newgrp docker
 
           # Install Docker Compose if not installed
           if ! command -v docker-compose &> /dev/null; then
