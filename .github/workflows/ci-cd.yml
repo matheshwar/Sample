@@ -25,6 +25,20 @@ jobs:
       run: |
         docker build -t ${{ secrets.DOCKER_USERNAME }}/backend:latest ./backend
         docker push ${{ secrets.DOCKER_USERNAME }}/backend:latest
+    - name: Copy files to EC2
+      env:
+        SSH_PRIVATE_KEY: ${{ secrets.EC2_SSH_KEY }}
+        EC2_HOST: ${{ secrets.EC2_HOST }}
+      run: |
+        echo "$SSH_PRIVATE_KEY" > private_key.pem
+        chmod 600 private_key.pem
+        ssh -o StrictHostKeyChecking=no -i private_key.pem ubuntu@$EC2_HOST << 'EOF'
+          if [ -d "/home/ubuntu/app" ]; then
+            rm -rf /home/ubuntu/app
+          fi
+        EOF
+        scp -o StrictHostKeyChecking=no -i private_key.pem -r ./* ubuntu@$EC2_HOST:/home/ubuntu/app
+        rm private_key.pem
 
   deploy:
     name: Deploy to EC2
@@ -32,9 +46,6 @@ jobs:
     needs: build
 
     steps:
-    - name: Checkout Repository
-      uses: actions/checkout@v3
-
     - name: Executing remote SSH commands on EC2
       uses: appleboy/ssh-action@master
       with:
