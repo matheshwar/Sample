@@ -73,16 +73,9 @@ jobs:
           #docker network create app-network || tru
 
           # Navigate to the deployment directory
-          cd /home/ubuntu
+          cd /home/ubuntu/app
 
-          # Clone the repository if it doesn't exist
-          if [ ! -d "Sample" ]; then
-            git clone https://github.com/matheshwar/Sample.git Sample
-          fi
-
-          # Pull the latest changes
-          cd Sample
-          git pull origin main
+          
 
           # Login to Docker Hub
           echo "$DOCKER_PASSWORD" | docker login -u "$DOCKER_USERNAME" --password-stdin
