@@ -1,32 +1,62 @@
 version: '3.8'
+
 services:
+  nginx-proxy:
+    image: jwilder/nginx-proxy
+    container_name: nginx-proxy
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - /var/run/docker.sock:/tmp/docker.sock:ro
+      - ./certs:/etc/nginx/certs
+      - ./vhost.d:/etc/nginx/vhost.d
+      - ./html:/usr/share/nginx/html
+    networks:
+      - sample_app-network
+
+  nginx-acme:
+    image: nginxproxy/acme-companion
+    container_name: nginx-acme
+    environment:
+      - DEFAULT_EMAIL=matheshwar.srinivasan@gmail.com
+    depends_on:
+      - nginx-proxy
+    volumes_from:
+      - nginx-proxy
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+      - ./certs:/etc/nginx/certs:rw
+      - ./vhost.d:/etc/nginx/vhost.d
+      - ./html:/usr/share/nginx/html
+      - ./acme:/etc/acme.sh
+    networks:
+      - sample_app-network
+
   backend:
     image: matheshwarsr/backend:latest
-    ports:
-      - "5000:5000"
+    expose:
+      - "5000"
     environment:
       - NODE_ENV=production
+      - VIRTUAL_HOST=drizzfit.com
+      - VIRTUAL_PATH=/api
+      - LETSENCRYPT_HOST=drizzfit.com
+      - LETSENCRYPT_EMAIL=matheshwar.srinivasan@gmail.com
     networks:
       - sample_app-network
 
   frontend:
     image: matheshwarsr/frontend:latest
-    ports:
-      - "3000:3000"
-    networks:
-      - sample_app-network
-
-  nginx:
-    image: nginx:latest
-    volumes:
-      - ./nginx/nginx.conf:/etc/nginx/conf.d/default.conf
-    ports:
-      - "80:80"
-    restart: always
+    expose:
+      - "3000"
+    environment:
+      - VIRTUAL_HOST=drizzfit.com
+      - LETSENCRYPT_HOST=drizzfit.com
+      - LETSENCRYPT_EMAIL=matheshwar.srinivasan@gmail.com
     networks:
       - sample_app-network
 
 networks:
   sample_app-network:
     driver: bridge
-    name: sample_app-network
