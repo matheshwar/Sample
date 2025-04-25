@@ -41,7 +41,7 @@ jobs:
         chmod 600 private_key.pem
         ssh -o StrictHostKeyChecking=no -i private_key.pem ubuntu@$EC2_HOST << 'EOF'
           if [ -d "/home/ubuntu/app" ]; then
-            rm -rf /home/ubuntu/app
+            sudo rm -rf /home/ubuntu/app
           fi
         EOF
         scp -o StrictHostKeyChecking=no -i private_key.pem -r ./* ubuntu@$EC2_HOST:/home/ubuntu/app
